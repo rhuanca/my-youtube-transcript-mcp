@@ -168,12 +168,38 @@ docker compose up -d
 npx @modelcontextprotocol/inspector http://localhost:8000/mcp
 ```
 
-## Usage from Claude
+## Tools
+
+The server exposes two independent tools:
+
+| Tool | Strategy | Requires | Speed |
+|---|---|---|---|
+| `transcribe_youtube_api` | YouTube Data API v3 — fetches official captions | `YOUTUBE_API_KEY` | Fast |
+| `transcribe_youtube_whisper` | yt-dlp + OpenAI Whisper — downloads audio and transcribes locally | `ffmpeg` | Slow |
+
+### Agent workflow
+
+The server instructs the agent to follow this order automatically:
+
+```
+1. Call transcribe_youtube_api
+        │
+        ├── success → done ✅
+        │
+        └── error (no captions / no API key / quota exceeded)
+                │
+                └── Call transcribe_youtube_whisper → done ✅
+```
+
+The agent will always report which strategy was used and the path to the saved `.txt` file.
+
+### Example prompts
 
 > "Transcribe this video: https://www.youtube.com/watch?v=..."
 
-The response includes the strategy used (`youtube_api` or `whisper_fallback`)
-and the absolute path to the saved `.txt` file.
+> "Get me the transcript of https://youtu.be/... and save it."
+
+> "Transcribe this YouTube Short: https://www.youtube.com/shorts/..."
 
 ## Whisper Model Tradeoffs (fallback path only)
 
