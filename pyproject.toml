@@ -11,7 +11,6 @@ dependencies = [
     "google-api-python-client>=2.100",
     "yt-dlp>=2024.0",
     "openai-whisper>=20231117",
-    "python-dotenv>=1.0",
 ]
 
 [project.scripts]

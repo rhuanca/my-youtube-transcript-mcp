@@ -2304,7 +2304,6 @@ dependencies = [
     { name = "fastmcp" },
     { name = "google-api-python-client" },
     { name = "openai-whisper" },
-    { name = "python-dotenv" },
     { name = "yt-dlp" },
 ]
 
@@ -2313,7 +2312,6 @@ requires-dist = [
     { name = "fastmcp", specifier = ">=2.0" },
     { name = "google-api-python-client", specifier = ">=2.100" },
     { name = "openai-whisper", specifier = ">=20231117" },
-    { name = "python-dotenv", specifier = ">=1.0" },
     { name = "yt-dlp", specifier = ">=2024.0" },
 ]
 

@@ -1,7 +1,4 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # --- YouTube Data API v3 ---
 # Get yours at: https://console.cloud.google.com/

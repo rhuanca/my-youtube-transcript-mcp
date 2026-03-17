@@ -13,7 +13,18 @@ build/
 
 # Output
 transcripts/
-/tmp/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs
+README.md
 
 # Editor
 .vscode/

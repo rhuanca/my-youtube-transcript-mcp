@@ -29,10 +29,9 @@ pip install uv
 ## Installation
 
 ```bash
+git clone <repo-url> youtube-transcriber-mcp
 cd youtube-transcriber-mcp
 uv sync
-cp .env.example .env
-# Add your YOUTUBE_API_KEY to .env
 ```
 
 ## Getting a YouTube Data API v3 Key (securely)
@@ -43,10 +42,21 @@ cp .env.example .env
 4. Create an **API key** under Credentials.
 5. Click **Restrict Key** → set API restrictions to **YouTube Data API v3 only**.
    This ensures the key is useless if ever leaked.
-6. Paste the key into `.env` as `YOUTUBE_API_KEY=...`
-7. **Never commit `.env` to git.** It is listed in `.gitignore`.
+6. Export the key in your shell: `export YOUTUBE_API_KEY=your_key_here`
+7. **Never commit your API key to git.**
 
-## Register with Claude Desktop (`claude_desktop_config.json`)
+## Running the Server
+
+### stdio (Claude Desktop / Claude Code)
+
+The default transport. Claude Desktop spawns the process and communicates over stdin/stdout.
+
+```bash
+export YOUTUBE_API_KEY=your_key_here
+uv run youtube-transcriber-mcp
+```
+
+Register in `claude_desktop_config.json`:
 
 ```json
 {
@@ -56,10 +66,73 @@ cp .env.example .env
       "args": [
         "--directory", "/absolute/path/to/youtube-transcriber-mcp",
         "run", "youtube-transcriber-mcp"
-      ]
+      ],
+      "env": {
+        "YOUTUBE_API_KEY": "your_key_here"
+      }
     }
   }
 }
+```
+
+### streamable-http (remote / network clients)
+
+Runs an HTTP server that clients connect to over the network.
+
+```bash
+export YOUTUBE_API_KEY=your_key_here
+uv run youtube-transcriber-mcp --transport streamable-http --host 0.0.0.0 --port 8000
+```
+
+Connect from Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "youtube-transcriber": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+### Docker
+
+Build and run the container (uses streamable-http on port 8000):
+
+```bash
+docker build -t youtube-transcriber-mcp .
+docker run -p 8000:8000 -e YOUTUBE_API_KEY=your_key_here youtube-transcriber-mcp
+```
+
+To persist transcripts on the host:
+
+```bash
+docker run -p 8000:8000 \
+  -e YOUTUBE_API_KEY=your_key_here \
+  -v $(pwd)/transcripts:/app/transcripts \
+  youtube-transcriber-mcp
+```
+
+### Docker Compose
+
+```bash
+YOUTUBE_API_KEY=your_key_here docker compose up
+```
+
+Or export the variable first:
+
+```bash
+export YOUTUBE_API_KEY=your_key_here
+docker compose up
+```
+
+To run in the background:
+
+```bash
+docker compose up -d
+docker compose logs -f   # follow logs
+docker compose down      # stop
 ```
 
 ## Usage from Claude
