@@ -135,6 +135,39 @@ docker compose logs -f   # follow logs
 docker compose down      # stop
 ```
 
+## Inspecting the Server
+
+### fastmcp dev (recommended)
+
+`fastmcp dev` starts the server and opens the MCP Inspector UI in the browser automatically. Requires Node.js.
+
+```bash
+export YOUTUBE_API_KEY=your_key_here
+uv run fastmcp dev youtube_transcriber_mcp/server.py
+```
+
+### MCP Inspector (standalone)
+
+If you prefer to run the inspector separately, start the server in streamable-http mode and point the inspector at it.
+
+```bash
+# Terminal 1 — start the server
+export YOUTUBE_API_KEY=your_key_here
+uv run youtube-transcriber-mcp --transport streamable-http --port 8000
+
+# Terminal 2 — open the inspector
+npx @modelcontextprotocol/inspector http://localhost:8000/mcp
+```
+
+The inspector opens at `http://localhost:5173` and lets you browse tools, call `transcribe_youtube` interactively, and inspect raw JSON request/response messages.
+
+### Inspecting a running Docker container
+
+```bash
+docker compose up -d
+npx @modelcontextprotocol/inspector http://localhost:8000/mcp
+```
+
 ## Usage from Claude
 
 > "Transcribe this video: https://www.youtube.com/watch?v=..."
