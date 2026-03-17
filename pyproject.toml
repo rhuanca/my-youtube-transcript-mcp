@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "youtube-transcriber-mcp"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.0",
+    "google-api-python-client>=2.100",
+    "yt-dlp>=2024.0",
+    "openai-whisper>=20231117",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+youtube-transcriber-mcp = "youtube_transcriber_mcp.__main__:main"

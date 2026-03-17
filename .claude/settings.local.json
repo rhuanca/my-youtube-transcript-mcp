@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync:*)",
+      "Bash(timeout 5 uv run youtube-transcriber-mcp)"
+    ]
+  }
+}
