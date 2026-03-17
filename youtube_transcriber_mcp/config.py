@@ -13,6 +13,3 @@ CAPTION_LANGUAGE = os.getenv("CAPTION_LANGUAGE", "en")
 # "small" is a good default: fast and accurate enough for educational content.
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")
 
-# --- Output ---
-# Absolute or relative path where .txt transcripts are saved
-TRANSCRIPTS_DIR = os.getenv("TRANSCRIPTS_DIR", "./transcripts")

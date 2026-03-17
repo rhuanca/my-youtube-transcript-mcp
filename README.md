@@ -177,6 +177,8 @@ The server exposes two independent tools:
 | `transcribe_youtube_api` | YouTube Data API v3 — fetches official captions | `YOUTUBE_API_KEY` | Fast |
 | `transcribe_youtube_whisper` | yt-dlp + OpenAI Whisper — downloads audio and transcribes locally | `ffmpeg` | Slow |
 
+Both tools return the transcript text directly in the response.
+
 ### Agent workflow
 
 The server instructs the agent to follow this order automatically:
@@ -220,4 +222,3 @@ Start with `small`. Model downloads automatically on first use.
 | `YOUTUBE_API_KEY` | _(empty)_ | YouTube Data API v3 key |
 | `CAPTION_LANGUAGE` | `en` | Preferred caption language (ISO 639-1) |
 | `WHISPER_MODEL` | `small` | Whisper model size |
-| `TRANSCRIPTS_DIR` | `./transcripts` | Output directory for `.txt` files |

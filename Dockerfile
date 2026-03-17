@@ -17,11 +17,6 @@ COPY youtube_transcriber_mcp/ ./youtube_transcriber_mcp/
 # Install Python dependencies
 RUN uv sync --no-dev
 
-# Create output directory
-RUN mkdir -p /app/transcripts
-
-ENV TRANSCRIPTS_DIR=/app/transcripts
-
 EXPOSE 8000
 
 CMD ["uv", "run", "youtube-transcriber-mcp", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000"]

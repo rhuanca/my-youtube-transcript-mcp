@@ -35,7 +35,7 @@ def transcribe_youtube_api(url: str) -> dict:
         url: Full YouTube video URL (watch, youtu.be, or shorts format).
 
     Returns:
-        On success:  { "status": "success", "title", "transcript_path", "source": "youtube_api", "word_count", "language" }
+        On success:  { "status": "success", "title", "transcript", "source": "youtube_api", "word_count", "language" }
         On failure:  { "status": "error", "code", "message", "suggestion" }
     """
     return transcribe_via_youtube_api(url)
@@ -54,7 +54,7 @@ def transcribe_youtube_whisper(url: str) -> dict:
         url: Full YouTube video URL (watch, youtu.be, or shorts format).
 
     Returns:
-        On success:  { "status": "success", "title", "transcript_path", "source": "whisper_fallback", "word_count", "language" }
+        On success:  { "status": "success", "title", "transcript", "source": "whisper_fallback", "word_count", "language" }
         On failure:  { "status": "error", "message" }
     """
     return transcribe_via_whisper(url)
