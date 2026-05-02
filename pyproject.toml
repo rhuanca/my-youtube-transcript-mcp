@@ -9,7 +9,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastmcp>=2.0",
     "google-api-python-client>=2.100",
-    "yt-dlp>=2024.0",
+    "yt-dlp>=2026.3.17",
     "openai-whisper>=20231117",
 ]
 

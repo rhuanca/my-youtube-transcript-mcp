@@ -48,6 +48,11 @@ def transcribe_with_whisper(video_id: str, video_title: str) -> dict:
         }],
         "quiet": True,
         "no_warnings": True,
+        # Required: YouTube blocks unauthenticated audio downloads with a bot challenge.
+        "cookiesfrombrowser": ("firefox",),
+        # Required: YouTube's player signature needs a JS challenge solver script
+        # that yt-dlp fetches on demand from the ejs GitHub release (cached locally).
+        "remote_components": ["ejs:github"],
     }
 
     logger.info("Downloading audio for video %r via yt-dlp", video_id)
