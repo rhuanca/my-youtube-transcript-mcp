@@ -7,7 +7,7 @@ from youtube_transcriber_mcp.strategies import youtube_api, whisper_fallback
 logger = logging.getLogger(__name__)
 
 
-def transcribe_via_youtube_api(url: str) -> dict:
+def transcribe_via_youtube_api(url: str, language: str = "en") -> dict:
     """
     Transcribe using the YouTube Data API v3 (primary strategy).
     Returns an error dict if YOUTUBE_API_KEY is not set, the URL is invalid,
@@ -24,9 +24,9 @@ def transcribe_via_youtube_api(url: str) -> dict:
     except ValueError as exc:
         return {"status": "error", "message": str(exc)}
 
-    logger.info("Fetching captions via YouTube Data API v3 for video: %s", video_id)
+    logger.info("Fetching captions via YouTube Data API v3 for video: %s (language=%s)", video_id, language)
     try:
-        result = youtube_api.fetch_captions(video_id)
+        result = youtube_api.fetch_captions(video_id, language=language)
     except youtube_api.CaptionsNotAvailableError as exc:
         return {
             "status": "error",
@@ -52,7 +52,7 @@ def transcribe_via_youtube_api(url: str) -> dict:
     }
 
 
-def transcribe_via_whisper(url: str) -> dict:
+def transcribe_via_whisper(url: str, language: str = "en") -> dict:
     """
     Transcribe by downloading audio with yt-dlp and running OpenAI Whisper locally (fallback strategy).
     Works for any public YouTube video regardless of caption availability. Requires ffmpeg.
@@ -62,9 +62,9 @@ def transcribe_via_whisper(url: str) -> dict:
     except ValueError as exc:
         return {"status": "error", "message": str(exc)}
 
-    logger.info("Transcribing via yt-dlp + Whisper for video: %s", video_id)
+    logger.info("Transcribing via yt-dlp + Whisper for video: %s (language=%s)", video_id, language)
     try:
-        result = whisper_fallback.transcribe_with_whisper(video_id, video_title=video_id)
+        result = whisper_fallback.transcribe_with_whisper(video_id, video_title=video_id, language=language)
     except Exception as exc:
         return {"status": "error", "message": str(exc)}
 

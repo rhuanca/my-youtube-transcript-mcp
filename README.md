@@ -1,23 +1,7 @@
 # YouTube Transcriber MCP Server
 
-A local MCP (Model Context Protocol) server that exposes a single tool:
-`transcribe_youtube(url)` — returns the transcript of a YouTube video and saves it as a `.txt` file.
-
-## Strategy Decision Flow
-
-```
-transcribe_youtube(url)
-        │
-        ▼
-YOUTUBE_API_KEY set?
-   ├── Yes → fetch captions via YouTube Data API v3
-   │         ├── Captions found → save .txt → ✅ (source: youtube_api)
-   │         └── No captions / 403 forbidden → fallback ↓
-   └── No  ──────────────────────────────────────↓
-                              yt-dlp downloads audio locally
-                              Whisper transcribes locally
-                              save .txt → ✅ (source: whisper_fallback)
-```
+A local MCP (Model Context Protocol) server that exposes two tools for transcribing YouTube videos:
+`transcribe_youtube_api` (fast, official captions) and `transcribe_youtube_whisper` (local audio transcription fallback). The transcript text is returned directly in the tool response.
 
 ## Prerequisites
 
@@ -25,6 +9,13 @@ YOUTUBE_API_KEY set?
 sudo apt install ffmpeg
 pip install uv
 ```
+
+The Whisper fallback path additionally requires:
+- **Firefox** installed, logged into youtube.com, and **closed** at run time. yt-dlp reads
+  cookies from Firefox's `cookies.sqlite` to bypass YouTube's bot-detection on audio
+  downloads. SQLite locks the file while Firefox is running.
+- Internet access on the first run to fetch the JS challenge solver from
+  [yt-dlp/ejs](https://github.com/yt-dlp/ejs) (cached in `~/.cache/yt-dlp/` thereafter).
 
 ## Installation
 
@@ -54,6 +45,12 @@ The default transport. Claude Desktop spawns the process and communicates over s
 ```bash
 export YOUTUBE_API_KEY=your_key_here
 uv run youtube-transcriber-mcp
+```
+
+Equivalent module invocation (no console-script entry needed):
+
+```bash
+uv run python -m youtube_transcriber_mcp
 ```
 
 Register in `claude_desktop_config.json`:
@@ -105,14 +102,10 @@ docker build -t youtube-transcriber-mcp .
 docker run -p 8000:8000 -e YOUTUBE_API_KEY=your_key_here youtube-transcriber-mcp
 ```
 
-To persist transcripts on the host:
-
-```bash
-docker run -p 8000:8000 \
-  -e YOUTUBE_API_KEY=your_key_here \
-  -v $(pwd)/transcripts:/app/transcripts \
-  youtube-transcriber-mcp
-```
+Note: the Whisper fallback's Firefox-cookie requirement makes the container
+unable to use that path out of the box (no Firefox profile is mounted). For
+container deployments, rely on the API path or extend the image to mount a
+cookies file.
 
 ### Docker Compose
 
@@ -193,7 +186,7 @@ The server instructs the agent to follow this order automatically:
                 └── Call transcribe_youtube_whisper → done ✅
 ```
 
-The agent will always report which strategy was used and the path to the saved `.txt` file.
+The agent will always report which strategy was used along with the transcript text, source, language, and word count.
 
 ### Example prompts
 
@@ -220,5 +213,6 @@ Start with `small`. Model downloads automatically on first use.
 | Variable | Default | Description |
 |---|---|---|
 | `YOUTUBE_API_KEY` | _(empty)_ | YouTube Data API v3 key |
-| `CAPTION_LANGUAGE` | `en` | Preferred caption language (ISO 639-1) |
 | `WHISPER_MODEL` | `small` | Whisper model size |
+
+The caption / transcription language is now a per-call `language` parameter on each tool (default `"en"`), not an env var.

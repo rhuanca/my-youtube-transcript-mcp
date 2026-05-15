@@ -15,3 +15,4 @@ dependencies = [
 
 [project.scripts]
 youtube-transcriber-mcp = "youtube_transcriber_mcp.__main__:main"
+transcribe-file = "youtube_transcriber_mcp.cli:main"

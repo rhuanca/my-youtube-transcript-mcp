@@ -22,7 +22,7 @@ mcp = FastMCP(
 
 
 @mcp.tool()
-def transcribe_youtube_api(url: str) -> dict:
+def transcribe_youtube_api(url: str, language: str = "en") -> dict:
     """
     Transcribe a YouTube video using the YouTube Data API v3.
 
@@ -33,16 +33,18 @@ def transcribe_youtube_api(url: str) -> dict:
 
     Args:
         url: Full YouTube video URL (watch, youtu.be, or shorts format).
+        language: ISO 639-1 caption language code (e.g. "en", "es", "fr"). Defaults to "en".
+                  Falls back to "en" if no track exists for the requested language.
 
     Returns:
         On success:  { "status": "success", "title", "transcript", "source": "youtube_api", "word_count", "language" }
         On failure:  { "status": "error", "code", "message", "suggestion" }
     """
-    return transcribe_via_youtube_api(url)
+    return transcribe_via_youtube_api(url, language=language)
 
 
 @mcp.tool()
-def transcribe_youtube_whisper(url: str) -> dict:
+def transcribe_youtube_whisper(url: str, language: str = "en") -> dict:
     """
     Transcribe a YouTube video by downloading its audio and running OpenAI Whisper locally.
 
@@ -52,9 +54,11 @@ def transcribe_youtube_whisper(url: str) -> dict:
 
     Args:
         url: Full YouTube video URL (watch, youtu.be, or shorts format).
+        language: ISO 639-1 language code passed to Whisper (e.g. "en", "es", "fr").
+                  Defaults to "en". Skips auto-detection — pick the language of the audio.
 
     Returns:
         On success:  { "status": "success", "title", "transcript", "source": "whisper_fallback", "word_count", "language" }
         On failure:  { "status": "error", "message" }
     """
-    return transcribe_via_whisper(url)
+    return transcribe_via_whisper(url, language=language)

@@ -16,9 +16,14 @@ class YouTubeAPIError(Exception):
     """Raised on API quota, key, or connectivity errors."""
 
 
-def fetch_captions(video_id: str) -> dict:
+def fetch_captions(video_id: str, language: str = "en") -> dict:
     """
     Fetch the official captions for a YouTube video using the YouTube Data API v3.
+
+    Args:
+        video_id: YouTube video ID.
+        language: Preferred ISO 639-1 caption language code. Falls back to "en"
+                  if no track matches, then raises CaptionsNotAvailableError.
     """
     try:
         youtube = build("youtube", "v3", developerKey=config.YOUTUBE_API_KEY)
@@ -57,18 +62,17 @@ def fetch_captions(video_id: str) -> dict:
         raise CaptionsNotAvailableError(f"No caption tracks available for video {video_id!r}.")
 
     # Step 4: Select best matching track
-    preferred_lang = config.CAPTION_LANGUAGE
     track_id = None
     language_used = None
 
     for item in caption_items:
         lang = item["snippet"]["language"]
-        if lang == preferred_lang:
+        if lang == language:
             track_id = item["id"]
             language_used = lang
             break
 
-    if track_id is None:
+    if track_id is None and language != "en":
         for item in caption_items:
             lang = item["snippet"]["language"]
             if lang == "en":
@@ -78,20 +82,25 @@ def fetch_captions(video_id: str) -> dict:
 
     if track_id is None:
         raise CaptionsNotAvailableError(
-            f"No caption track found for language {preferred_lang!r} or 'en' "
+            f"No caption track found for language {language!r} or 'en' "
             f"for video {video_id!r}."
         )
 
     logger.info("Selected caption track %r (language: %s)", track_id, language_used)
 
-    # Step 5: Download the caption track
+    # Step 5: Download the caption track.
+    # NOTE: captions.download is one of the few YouTube Data API v3 endpoints that
+    # does NOT accept API keys — it requires OAuth 2.0 and only works for videos
+    # the authenticated user owns. For any other video, Google returns 401 with
+    # "API keys are not supported by this API." 401 and 403 both mean "fall back".
     try:
         srt_bytes = youtube.captions().download(id=track_id, tfmt="srt").execute()
     except HttpError as exc:
         status = exc.resp.status
-        if status == 403:
+        if status in (401, 403):
             raise CaptionsNotAvailableError(
-                f"Cannot download captions for {video_id!r} (HTTP 403 — likely auto-generated)."
+                f"Cannot download captions for {video_id!r} via API key "
+                f"(HTTP {status} — captions.download requires OAuth)."
             ) from exc
         if status in (429,):
             raise YouTubeAPIError(f"YouTube API quota exceeded downloading captions (HTTP {status})") from exc

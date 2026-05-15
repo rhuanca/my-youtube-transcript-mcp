@@ -19,9 +19,14 @@ def _get_whisper_model():
     return _whisper_model
 
 
-def transcribe_with_whisper(video_id: str, video_title: str) -> dict:
+def transcribe_with_whisper(video_id: str, video_title: str, language: str = "en") -> dict:
     """
     Download audio with yt-dlp and transcribe locally with OpenAI Whisper.
+
+    Args:
+        video_id: YouTube video ID.
+        video_title: Title used for the temp audio filename.
+        language: ISO 639-1 language code passed to Whisper. Skips auto-detection.
     """
     # Step 1: Check ffmpeg availability
     if not shutil.which("ffmpeg"):
@@ -66,8 +71,8 @@ def transcribe_with_whisper(video_id: str, video_title: str) -> dict:
     # Step 4 & 5: Load model and transcribe
     try:
         model = _get_whisper_model()
-        logger.info("Transcribing audio with Whisper model %r", config.WHISPER_MODEL)
-        result = model.transcribe(audio_path)
+        logger.info("Transcribing audio with Whisper model %r (language=%s)", config.WHISPER_MODEL, language)
+        result = model.transcribe(audio_path, language=language)
     finally:
         # Step 6: Always clean up temp audio
         if os.path.exists(audio_path):
